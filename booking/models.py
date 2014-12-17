@@ -50,6 +50,15 @@ class Duck(models.Model):
 
         return self.name
 
+    def age(self):
+        seconds_d = timezone.now() - self.donated_at
+        seconds = seconds_d.total_seconds()
+
+        if seconds < 0:
+            return -1
+
+        return seconds
+
 class DuckName(models.Model):
     """Model to hold name suggestions for Ducks"""
 

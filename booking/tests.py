@@ -1,4 +1,9 @@
 from django.test import TestCase, Client
+from django.utils import timezone
+
+import datetime
+
+from .models import Duck
 
 class FrontTest(TestCase):
     def setUp(self):
@@ -15,3 +20,8 @@ class FrontTest(TestCase):
     def test_disclaimer_page(self):
         response = self.client.get('/disclaimer.html')
         self.assertEqual(response.status_code, 200)
+
+class DuckAgeTest(TestCase):
+    def test_duck_is_from_the_future(self):
+        future_duck = Duck(donated_at = timezone.now() + datetime.timedelta(days = 2))
+        self.assertEqual(future_duck.age(), -1)
