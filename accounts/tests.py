@@ -7,6 +7,29 @@ class FrontTest(TestCase):
     def setUp(self):
         self.client = Client()
 
+        self.admin = User.objects.create_user(
+            username = 'admin',
+            password = 'password')
+        self.admin.save()
+
+    def test_login_page(self):
+        response = self.client.get('/accounts/login')
+        self.assertEqual(response.status_code, 200)
+
+    def test_login(self):
+        response = self.client.post('/accounts/login', {
+            'next': '/',
+            'username': 'admin',
+            'password': 'password'})
+
+        self.assertRedirects(response, '/')
+
+    def test_logout(self):
+        self.client.login(username = 'admin', password = 'aeou')
+
+        response = self.client.get('/accounts/logout')
+        self.assertRedirects(response, '/')
+
     def test_registration_page(self):
         response = self.client.get('/accounts/register')
         self.assertEqual(response.status_code, 200)

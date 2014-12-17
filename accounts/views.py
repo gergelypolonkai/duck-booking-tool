@@ -18,6 +18,6 @@ class RegistrationFormView(generic.View):
         if form.is_valid():
             form.save()
 
-            return HttpResponseRedirect(reverse('booking:index'))
+            return HttpResponseRedirect(reverse('booking:list'))
 
         return render(request, self.template_name, {'form': form})

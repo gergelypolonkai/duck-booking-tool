@@ -5,9 +5,16 @@
     </head>
     <body>
         <h1>Rubber Duck Booking Tool</h1>
+{% if user.is_authenticated %}
         <div>
-            <a href="{% url 'accounts:register' %}">Register</a>
+            Logged in as {{ user }}
+            <a href="{% url 'accounts:logout' %}">Logout</a>
         </div>
+{% else %}
+        <div>
+            <a href="{% url 'accounts:login' %}">Login</a> or <a href="{% url 'accounts:register' %}">Register</a>
+        </div>
+{% endif %}
         <a href="{% url 'booking:list' %}">Home</a>
         <a href="{% url 'booking:terms' %}">Terms and Conditions</a>
         <a href="{% url 'booking:vocabulary' %}">Vocabulary</a>
