@@ -35,6 +35,7 @@ class Duck(models.Model):
     color = models.CharField(max_length = 6)
     species = models.ForeignKey(Species)
     location = models.ForeignKey(Location)
+    comps = models.ManyToManyField(Competence, through = 'DuckCompetence')
     donated_by = models.ForeignKey(User)
     donated_at = models.DateTimeField(default = timezone.now)
     adopted_by = models.ForeignKey(User, related_name = 'adopted_ducks', null = True)
@@ -47,3 +48,14 @@ class Duck(models.Model):
             return 'Unnamed :('
 
         return self.name
+
+class DuckCompetence(models.Model):
+    """Duck competence governor table"""
+
+    duck = models.ForeignKey(Duck)
+    comp = models.ForeignKey(Competence)
+    up_minutes = models.IntegerField(default = 0)
+    down_minutes = models.IntegerField(default = 0)
+
+    class Meta:
+        unique_together = ('duck', 'comp')
