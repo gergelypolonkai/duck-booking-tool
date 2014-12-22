@@ -40,6 +40,7 @@ class Duck(models.Model):
     donated_at = models.DateTimeField(default = timezone.now)
     adopted_by = models.ForeignKey(User, related_name = 'adopted_ducks', null = True)
     adopted_at = models.DateTimeField(null = True)
+    bookings = models.ManyToManyField(User, through = 'Booking', related_name = '+')
     on_holiday_since = models.DateTimeField(null = True)
     on_holiday_until = models.DateTimeField(null = True)
 
@@ -59,3 +60,13 @@ class DuckCompetence(models.Model):
 
     class Meta:
         unique_together = ('duck', 'comp')
+
+class Booking(models.Model):
+    """Duck booking governor table"""
+
+    duck = models.ForeignKey(Duck)
+    user = models.ForeignKey(User)
+    comp_req = models.ForeignKey(Competence)
+    start_ts = models.DateTimeField(default = timezone.now)
+    end_ts = models.DateTimeField(null = True, blank = True)
+    successful = models.BooleanField(default = True)
