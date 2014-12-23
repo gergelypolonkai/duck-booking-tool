@@ -11,3 +11,7 @@ class FrontTest(TestCase):
     def test_terms_page(self):
         response = self.client.get('/terms.html')
         self.assertEqual(response.status_code, 200)
+
+    def test_disclaimer_page(self):
+        response = self.client.get('/disclaimer.html')
+        self.assertEqual(response.status_code, 200)

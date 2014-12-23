@@ -13,4 +13,9 @@ urlpatterns = patterns(
         TemplateView.as_view(template_name = 'booking/terms.html'),
         name = 'terms'
     ),
+    url(
+        r'^disclaimer.html$',
+        TemplateView.as_view(template_name = 'booking/disclaimer.html'),
+        name = 'disclaimer'
+    ),
 )
