@@ -8,4 +8,9 @@ urlpatterns = patterns(
         TemplateView.as_view(template_name = 'booking/vocabulary.html'),
         name = 'vocabulary'
     ),
+    url(
+        r'^terms.html$',
+        TemplateView.as_view(template_name = 'booking/terms.html'),
+        name = 'terms'
+    ),
 )

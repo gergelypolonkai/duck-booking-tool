@@ -7,3 +7,7 @@ class FrontTest(TestCase):
     def test_vocabulary_page(self):
         response = self.client.get('/vocabulary.html')
         self.assertEqual(response.status_code, 200)
+
+    def test_terms_page(self):
+        response = self.client.get('/terms.html')
+        self.assertEqual(response.status_code, 200)
