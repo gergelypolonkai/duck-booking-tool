@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'django_js_reverse',
     'accounts',
     'booking',
+    'api',
 )
 
 MIDDLEWARE_CLASSES = (

@@ -1,0 +1,8 @@
+[
+    {% for comp in duck.duckcompetence_set.all %}
+    {
+        "name": "{{ comp.comp.name }}",
+        "level": {{ comp.level }}
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+]
