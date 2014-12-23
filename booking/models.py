@@ -107,3 +107,7 @@ class Booking(models.Model):
     @staticmethod
     def total_booking_time():
         return Booking.objects.filter(start_ts__isnull = False, end_ts__isnull = False).extra(select = {'amount': 'sum(strftime(%s, end_ts) - strftime(%s, start_ts))'}, select_params = ('%s', '%s'))[0].amount
+
+    @staticmethod
+    def duck_booking_time(duck):
+        return Booking.objects.filter(start_ts__isnull = False, end_ts__isnull = False, duck = duck).extra(select = {'amount': 'sum(strftime(%s, end_ts) - strftime(%s, start_ts))'}, select_params = ('%s', '%s'))[0].amount

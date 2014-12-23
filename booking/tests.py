@@ -184,3 +184,7 @@ class BookingTimeTest(TestCase):
 
     def test_total_booking_time(self):
         self.assertEqual(Booking.total_booking_time(), 259200)
+
+    def test_duck_booking_time(self):
+        self.assertEqual(Booking.duck_booking_time(self.duck1), 86400)
+        self.assertEqual(Booking.duck_booking_time(self.duck2), 172800)
