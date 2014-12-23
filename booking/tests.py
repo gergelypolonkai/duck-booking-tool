@@ -188,3 +188,7 @@ class BookingTimeTest(TestCase):
     def test_duck_booking_time(self):
         self.assertEqual(Booking.duck_booking_time(self.duck1), 86400)
         self.assertEqual(Booking.duck_booking_time(self.duck2), 172800)
+
+    def test_dpx(self):
+        self.assertEqual(self.duck1.dpx(), 1/3)
+        self.assertEqual(self.duck2.dpx(), 2/3)

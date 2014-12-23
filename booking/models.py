@@ -62,6 +62,15 @@ class Duck(models.Model):
 
         return seconds
 
+    def dpx(self):
+        all_time = Booking.total_booking_time()
+        duck_time = Booking.duck_booking_time(self)
+
+        if (all_time == None) or (duck_time == None):
+            return 0
+
+        return Booking.duck_booking_time(self) / Booking.total_booking_time()
+
 class DuckName(models.Model):
     """Model to hold name suggestions for Ducks"""
 
