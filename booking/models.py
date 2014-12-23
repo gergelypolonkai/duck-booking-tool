@@ -50,6 +50,24 @@ class Duck(models.Model):
 
         return self.name
 
+class DuckName(models.Model):
+    """Model to hold name suggestions for Ducks"""
+
+    duck = models.ForeignKey(Duck)
+    name = models.CharField(max_length = 60)
+    suggested_by = models.ForeignKey(User)
+    suggested_at = models.DateTimeField(default = timezone.now)
+    closed_by = models.ForeignKey(User, related_name = '+')
+    closed_at = models.DateTimeField(null = True)
+
+class DuckNameVote(models.Model):
+    """Model to hold votes to Duck names"""
+
+    duck_name = models.ForeignKey(DuckName)
+    vote_timestamp = models.DateTimeField(default = timezone.now)
+    voter = models.ForeignKey(User)
+    upvote = models.BooleanField(default = True)
+
 class DuckCompetence(models.Model):
     """Duck competence governor table"""
 
