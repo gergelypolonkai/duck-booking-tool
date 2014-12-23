@@ -192,3 +192,25 @@ class BookingTimeTest(TestCase):
     def test_dpx(self):
         self.assertEqual(self.duck1.dpx(), 1/3)
         self.assertEqual(self.duck2.dpx(), 2/3)
+
+class TestListing(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        species = Species()
+        species.save()
+
+        loc = Location()
+        loc.save()
+
+        user = User()
+        user.save()
+
+        self.duck = Duck(species = species, location = loc, donated_by = user)
+        self.duck.save()
+
+    def test_front_page(self):
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['duck_list']), 1)

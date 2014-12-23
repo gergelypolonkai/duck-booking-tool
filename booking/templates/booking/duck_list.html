@@ -1,0 +1,23 @@
+{% extends 'front_template.html' %}
+{% load booking_tags %}
+
+{% block body %}
+{% if duck_list %}
+{% for duck in duck_list %}
+<div class="duck" id="duck-icon-{{ duck.id }}" style="background-color: #{{ duck.color }};">
+    {{ duck }}<br>
+    {{ duck.species }}
+</div>
+<div class="profile" id="duck-profile-{{ duck.id }}">
+    Employee for {{ duck.age|age_format:1 }}<br>
+    Location: {{ duck.location }}<br>
+    DPX: {{ duck.dpx }}<br>
+    <div class="button" id="duck-book-{{ duck.id }}">book-button</div>
+    <div class="button" id="duck-complist-{{ duck.id }}">complist-button</div>
+    <div class="button" id="duck-namesugg-{{ duck.id }}">namesugg-button</div>
+    <div class="button" id="duck-adopt-{{ duck.id }}">adopt-button</div>
+</div>
+{% endfor %}
+<br class="clear">
+{% endif %}
+{% endblock %}
