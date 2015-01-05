@@ -1,12 +1,14 @@
 from django.shortcuts import render, get_object_or_404
+from django.views import generic
 
 from booking.models import Duck
 
-def duck_comp_list(request, duck_id):
-    duck = get_object_or_404(Duck, pk = duck_id)
+class DuckCompListView(generic.ListView):
+    template_name = 'api/duck_comp_list.json'
+    context_object_name = 'comp_list'
 
-    context = {
-        'duck': duck
-    }
+    def get_queryset(self):
+        duck_id = self.kwargs['duck_id']
+        duck = get_object_or_404(Duck, pk = duck_id)
 
-    return render(request, 'api/duck_comp_list.json', context)
+        return duck.duckcompetence_set.all()

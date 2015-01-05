@@ -1,0 +1,11 @@
+.button {
+    background-color: #aaa;
+    display: inline;
+    padding: .2em;
+    margin: .1em;
+    cursor: pointer;
+}
+
+.no-close .ui-dialog-titlebar-close {
+    display: none;
+}

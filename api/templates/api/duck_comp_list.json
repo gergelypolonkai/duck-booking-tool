@@ -1,5 +1,5 @@
 [
-    {% for comp in duck.duckcompetence_set.all %}
+    {% for comp in comp_list %}
     {
         "name": "{{ comp.comp.name }}",
         "level": {{ comp.level }}

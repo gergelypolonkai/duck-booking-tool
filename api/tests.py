@@ -25,7 +25,10 @@ class ApiTest(TestCase):
         user = User()
         user.save()
 
-        self.duck = Duck(pk = 1, species = species, location = loc, donated_by = user)
+        self.duck = Duck(
+            species = species,
+            location = loc,
+            donated_by = user)
         self.duck.save()
 
         comp = Competence(name = 'test', added_by = user)
@@ -38,4 +41,4 @@ class ApiTest(TestCase):
         response = self.client.get('/api/duck/1/competence.json')
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(len(response.context['duck'].duckcompetence_set.all()), 1)
+        self.assertEqual(len(response.context['comp_list']), 1)
