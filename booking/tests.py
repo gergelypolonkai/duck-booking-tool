@@ -13,6 +13,10 @@ class FrontTest(TestCase):
     def setUp(self):
         self.client = Client()
 
+    def test_index_page(self):
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+
     def test_vocabulary_page(self):
         response = self.client.get('/vocabulary.html')
         self.assertEqual(response.status_code, 200)
@@ -214,3 +218,34 @@ class TestListing(TestCase):
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(len(response.context['duck_list']), 1)
+
+class SimilarCompTest(TestCase):
+    def setUp(self):
+        admin = User(username = 'admin')
+        admin.save()
+
+        competence_list = (
+            'Creativity',
+            'Administration',
+            'Perl',
+            'Python',
+            'TCSH',
+        )
+
+        for c in competence_list:
+            comp = Competence(name = c, added_by = admin)
+            comp.save()
+
+    def test_good_similar_competences(self):
+        l = Competence.get_similar_comps('perl')
+        self.assertEquals(len(l), 1)
+
+        l = Competence.get_similar_comps('pzthon')
+        self.assertEquals(len(l), 1)
+
+        l = Competence.get_similar_comps('kreativitás')
+        self.assertEqual(len(l), 1)
+
+    def test_bad_similar_competence(self):
+        l = Competence.get_similar_comps('development')
+        self.assertEqual(len(l), 0)

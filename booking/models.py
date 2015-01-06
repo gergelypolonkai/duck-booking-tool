@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.conf import settings
 
+from fuzzywuzzy import fuzz
+
 from .ducklevel import minutes_to_level
 
 class Species(models.Model):
@@ -30,6 +32,20 @@ class Competence(models.Model):
 
     def __str__(self):
         return self.name
+
+    @staticmethod
+    def get_similar_comps(name):
+        comps = __class__.objects.values_list('name', flat = True)
+        ret = ()
+
+        for c in comps:
+            r = fuzz.ratio(name.lower(), c.lower())
+
+            # This ratio is subject to change
+            if r > settings.MIN_FUZZY_SIMILARITY:
+                ret = ret + (c,)
+
+        return ret
 
 class Duck(models.Model):
     """Model to hold Duck data"""
