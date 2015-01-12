@@ -3,5 +3,6 @@ from django.views.generic import TemplateView
 
 urlpatterns = patterns(
     '',
-    url('',   include('booking.urls', namespace = 'booking')),
+    url(r'^accounts/', include('accounts.urls', namespace = 'accounts')),
+    url('',            include('booking.urls',  namespace = 'booking')),
 )

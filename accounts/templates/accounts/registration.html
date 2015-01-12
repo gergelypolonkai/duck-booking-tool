@@ -1,0 +1,10 @@
+{% extends 'front_template.html' %}
+
+{% block body %}
+<p>For later convenience, please use your corporate ID as the username!</p>
+<form method="post" action="{% url 'accounts:register' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Register</button>
+</form>
+{% endblock %}
