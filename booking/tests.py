@@ -1,8 +1,10 @@
 from django.test import TestCase, Client
 from django.utils import timezone
+from django.conf import settings
 
 import datetime
 
+from .ducklevel import level_to_up_minutes, level_to_down_minutes, minutes_to_level
 from .templatetags import booking_tags
 from .models import Duck
 
@@ -21,6 +23,62 @@ class FrontTest(TestCase):
     def test_disclaimer_page(self):
         response = self.client.get('/disclaimer.html')
         self.assertEqual(response.status_code, 200)
+
+class DuckCompLevelTest(TestCase):
+    def test_sane_max(self):
+        self.assertGreater(
+            settings.MAX_DUCK_LEVEL, 0,
+            msg = "MAX_DUCK_LEVEL must be greater than zero!")
+
+    def test_max_minutes(self):
+        """Test if level can not go above settings.MAX_DUCK_LEVEL)"""
+
+        max_up_minutes = level_to_up_minutes(settings.MAX_DUCK_LEVEL)
+        double_minutes = level_to_up_minutes(settings.MAX_DUCK_LEVEL * 2)
+        max_down_minutes = level_to_down_minutes(settings.MAX_DUCK_LEVEL)
+
+        level = minutes_to_level(max_up_minutes, 0)
+        self.assertEqual(level, settings.MAX_DUCK_LEVEL)
+
+        level = minutes_to_level(max_up_minutes + 1, 0)
+        self.assertEqual(level, settings.MAX_DUCK_LEVEL)
+
+        level = minutes_to_level(double_minutes, 0)
+        self.assertEqual(level, settings.MAX_DUCK_LEVEL)
+
+        level = minutes_to_level(0, max_down_minutes)
+        self.assertEqual(level, settings.MAX_DUCK_LEVEL)
+
+        level = minutes_to_level(0, max_down_minutes + 1)
+        self.assertEqual(level, settings.MAX_DUCK_LEVEL)
+
+    def test_conversions(self):
+        for i in range(1, settings.MAX_DUCK_LEVEL):
+            up_minutes = level_to_up_minutes(i)
+            down_minutes = level_to_down_minutes(i)
+
+            up_level = minutes_to_level(up_minutes, 0)
+            down_level = minutes_to_level(0, down_minutes)
+
+            self.assertEqual(up_level, i, msg = "Test failed for value %d" % i)
+            self.assertEqual(
+                down_level, i,
+                msg = "Test failed for value %d" % i)
+
+    def test_level_to_minutes(self):
+        self.assertEqual(level_to_up_minutes(0), 0)
+        self.assertEqual(level_to_up_minutes(1), 20)
+        self.assertEqual(level_to_up_minutes(2), 200)
+        self.assertEqual(level_to_up_minutes(3), 2000)
+        self.assertEqual(level_to_up_minutes(4), 20000)
+        self.assertEqual(level_to_up_minutes(5), 200000)
+
+        self.assertEqual(level_to_down_minutes(0), 0)
+        self.assertEqual(level_to_down_minutes(1), 200)
+        self.assertEqual(level_to_down_minutes(2), 2000)
+        self.assertEqual(level_to_down_minutes(3), 20000)
+        self.assertEqual(level_to_down_minutes(4), 200000)
+        self.assertEqual(level_to_down_minutes(5), 2000000)
 
 class DuckAgeTest(TestCase):
     def test_duck_is_from_the_future(self):
