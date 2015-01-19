@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.conf import settings
+
+from .ducklevel import minutes_to_level
 
 class Species(models.Model):
     """Model to hold the Ducks’ species"""
@@ -84,6 +87,9 @@ class DuckCompetence(models.Model):
     comp = models.ForeignKey(Competence)
     up_minutes = models.IntegerField(default = 0)
     down_minutes = models.IntegerField(default = 0)
+
+    def level(self):
+        return minutes_to_level(self.up_minutes, self.down_minutes)
 
     class Meta:
         unique_together = ('duck', 'comp')

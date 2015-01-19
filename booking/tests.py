@@ -6,7 +6,7 @@ import datetime
 
 from .ducklevel import level_to_up_minutes, level_to_down_minutes, minutes_to_level
 from .templatetags import booking_tags
-from .models import Duck
+from .models import Duck, Competence, DuckCompetence
 
 class FrontTest(TestCase):
     def setUp(self):
@@ -25,6 +25,15 @@ class FrontTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
 class DuckCompLevelTest(TestCase):
+    def setUp(self):
+        duck = Duck()
+        comp = Competence(name = 'testing')
+        self.duckcomp = DuckCompetence(
+            duck = duck,
+            comp = comp,
+            up_minutes = 0,
+            down_minutes =0)
+
     def test_sane_max(self):
         self.assertGreater(
             settings.MAX_DUCK_LEVEL, 0,
@@ -79,6 +88,24 @@ class DuckCompLevelTest(TestCase):
         self.assertEqual(level_to_down_minutes(3), 20000)
         self.assertEqual(level_to_down_minutes(4), 200000)
         self.assertEqual(level_to_down_minutes(5), 2000000)
+
+    def test_no_comp(self):
+        self.duckcomp.up_minutes = 0
+        self.duckcomp.down_minutes = 0
+        self.assertEquals(self.duckcomp.level(), 0)
+
+    def test_comp_levels(self):
+        self.duckcomp.down_minutes = 0
+
+        for lvl in range(1, settings.MAX_DUCK_LEVEL):
+            minutes = level_to_up_minutes(lvl)
+            self.duckcomp.up_minutes = minutes
+            self.assertEqual(self.duckcomp.level(), lvl)
+
+    def test_high_minutes(self):
+        self.duckcomp.up_minutes = level_to_up_minutes(settings.MAX_DUCK_LEVEL)
+        self.duckcomp.down_minutes = level_to_down_minutes(settings.MAX_DUCK_LEVEL)
+        self.assertEqual(self.duckcomp.level(), settings.MAX_DUCK_LEVEL)
 
 class DuckAgeTest(TestCase):
     def test_duck_is_from_the_future(self):
