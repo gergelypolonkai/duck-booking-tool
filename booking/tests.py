@@ -1,12 +1,13 @@
 from django.test import TestCase, Client
 from django.utils import timezone
 from django.conf import settings
+from django.contrib.auth.models import User
 
 import datetime
 
 from .ducklevel import level_to_up_minutes, level_to_down_minutes, minutes_to_level
 from .templatetags import booking_tags
-from .models import Duck, Competence, DuckCompetence
+from .models import Duck, Competence, DuckCompetence, Species, Location, Booking
 
 class FrontTest(TestCase):
     def setUp(self):
@@ -147,3 +148,39 @@ class DuckAgeTest(TestCase):
         self.assertEqual(booking_tags.age_format(34128000), "1 year 1 month")
         self.assertEqual(booking_tags.age_format(36720000), "1 year 2 months")
         self.assertEqual(booking_tags.age_format(63072000), "2 years")
+
+class BookingTimeTest(TestCase):
+    duck1 = None
+    duck2 = None
+
+    def setUp(self):
+        user = User()
+        user.save()
+
+        species = Species(name = 'duck')
+        species.save()
+
+        location = Location(name = 'start')
+        location.save()
+
+        self.duck1 = Duck(species = species, location = location, donated_by = user)
+        self.duck1.save()
+
+        competence = Competence(name = 'test', added_by = user)
+        competence.save()
+
+        now = timezone.now()
+        booking = Booking(duck = self.duck1, start_ts = now - datetime.timedelta(days = 2), end_ts = now - datetime.timedelta(days = 1), user = user, comp_req = competence)
+        booking.save()
+
+        self.duck2 = Duck(species = species, location = location, donated_by = user)
+        self.duck2.save()
+
+        booking = Booking(duck = self.duck2, start_ts = now - datetime.timedelta(days = 3), end_ts = now - datetime.timedelta(days = 2), user = user, comp_req = competence)
+        booking.save()
+
+        booking = Booking(duck = self.duck2, start_ts = now - datetime.timedelta(days = 2), end_ts = now - datetime.timedelta(days = 1), user = user, comp_req = competence)
+        booking.save()
+
+    def test_total_booking_time(self):
+        self.assertEqual(Booking.total_booking_time(), 259200)

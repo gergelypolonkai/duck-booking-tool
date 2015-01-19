@@ -103,3 +103,7 @@ class Booking(models.Model):
     start_ts = models.DateTimeField(default = timezone.now)
     end_ts = models.DateTimeField(null = True, blank = True)
     successful = models.BooleanField(default = True)
+
+    @staticmethod
+    def total_booking_time():
+        return Booking.objects.filter(start_ts__isnull = False, end_ts__isnull = False).extra(select = {'amount': 'sum(strftime(%s, end_ts) - strftime(%s, start_ts))'}, select_params = ('%s', '%s'))[0].amount
