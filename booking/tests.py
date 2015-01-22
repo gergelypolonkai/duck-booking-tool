@@ -249,3 +249,32 @@ class SimilarCompTest(TestCase):
     def test_bad_similar_competence(self):
         l = Competence.get_similar_comps('development')
         self.assertEqual(len(l), 0)
+
+class BookingTest(TestCase):
+    def setUp(self):
+        spec = Species(name = 'test')
+        spec.save()
+
+        loc = Location(name = 'test')
+        loc.save()
+
+        user = User(username = 'test')
+        user.save()
+
+        self.booked_duck = Duck(species = spec, location = loc, donated_by = user)
+        self.booked_duck.save()
+
+        comp = Competence(name = 'test', added_by = user)
+        comp.save()
+
+        booking = Booking(duck = self.booked_duck, user = user, comp_req = comp)
+        booking.save()
+
+        self.unbooked_duck = Duck(species = spec, location = loc, donated_by = user)
+        self.unbooked_duck.save()
+
+    def test_booked_duck(self):
+        self.assertNotEqual(self.booked_duck.booked_by(), None)
+
+    def test_unbooked_duck(self):
+        self.assertEqual(self.unbooked_duck.booked_by(), None)

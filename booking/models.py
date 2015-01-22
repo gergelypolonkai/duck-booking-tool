@@ -87,6 +87,17 @@ class Duck(models.Model):
 
         return Booking.duck_booking_time(self) / Booking.total_booking_time()
 
+    def booked_by(self):
+        l = self.booking_set.filter(end_ts = None)
+
+        if len(l) == 0:
+            return None
+
+        if len(l) > 1:
+            raise RuntimeError(u"Duck is booked more than once!")
+
+        return l[0].user
+
 class DuckName(models.Model):
     """Model to hold name suggestions for Ducks"""
 
