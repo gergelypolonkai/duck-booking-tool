@@ -31,8 +31,25 @@ class FrontTest(TestCase):
 
 class DuckCompLevelTest(TestCase):
     def setUp(self):
-        duck = Duck()
-        comp = Competence(name = 'testing')
+        user = User.objects.create_user(username='test', password='test')
+
+        species = Species(name='test species')
+        species.save()
+
+        location = Location(name='test location')
+        location.save()
+
+        duck = Duck(
+                species=species,
+                location=location,
+                donated_by=user)
+        duck.save()
+
+        comp = Competence(
+                name='testing',
+                added_by=user)
+        comp.save()
+
         self.duckcomp = DuckCompetence(
             duck = duck,
             comp = comp,
