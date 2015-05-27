@@ -41,7 +41,7 @@ class ApiTest(TestCase):
         duckcomp.save()
 
     def test_duck_comp_list(self):
-        response = self.client.get('/api/duck/1/competence.json')
+        response = self.client.get('/api/v1/duck/1/competence.json')
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(len(response.context['comp_list']), 1)
@@ -107,7 +107,7 @@ class DuckBookingTest(TestCase):
 
     def send_booking_json(self, json_data):
         return self.client.post(
-            '/api/duck/book/',
+            '/api/v1/duck/book/',
             json.dumps(json_data),
             HTTP_X_REQUESTED_WITH = 'XMLHttpRequest',
             content_type = 'application/json')
