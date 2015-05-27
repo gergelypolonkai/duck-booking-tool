@@ -35,9 +35,9 @@ class Competence(models.Model):
     def __str__(self):
         return self.name
 
-    @staticmethod
-    def get_similar_comps(name):
-        comps = __class__.objects.values_list('name', flat = True)
+    @classmethod
+    def get_similar_comps(cls, name):
+        comps = cls.objects.values_list('name', flat = True)
         ret = ()
 
         for c in comps:
@@ -142,10 +142,10 @@ class Booking(models.Model):
     end_ts = models.DateTimeField(null = True, blank = True)
     successful = models.BooleanField(default = True)
 
-    @staticmethod
-    def total_booking_time():
-        return Booking.objects.filter(start_ts__isnull = False, end_ts__isnull = False).extra(select = {'amount': 'sum(strftime(%s, end_ts) - strftime(%s, start_ts))'}, select_params = ('%s', '%s'))[0].amount
+    @classmethod
+    def total_booking_time(cls):
+        return cls.objects.filter(start_ts__isnull = False, end_ts__isnull = False).extra(select = {'amount': 'sum(strftime(%s, end_ts) - strftime(%s, start_ts))'}, select_params = ('%s', '%s'))[0].amount
 
-    @staticmethod
-    def duck_booking_time(duck):
-        return Booking.objects.filter(start_ts__isnull = False, end_ts__isnull = False, duck = duck).extra(select = {'amount': 'sum(strftime(%s, end_ts) - strftime(%s, start_ts))'}, select_params = ('%s', '%s'))[0].amount
+    @classmethod
+    def duck_booking_time(cls, duck):
+        return cls.objects.filter(start_ts__isnull = False, end_ts__isnull = False, duck = duck).extra(select = {'amount': 'sum(strftime(%s, end_ts) - strftime(%s, start_ts))'}, select_params = ('%s', '%s'))[0].amount
