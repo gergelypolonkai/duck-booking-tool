@@ -1,5 +1,4 @@
 from django.test import TestCase, Client
-from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.conf import settings
 
@@ -15,14 +14,6 @@ def get_response_encoding(response):
         encoding = response['content-encoding']
 
     return encoding
-
-class ReverseTest(TestCase):
-    def setUp(self):
-        self.client = Client()
-
-    def test_reverse_js(self):
-        response = self.client.get(reverse('api:js_reverse'))
-        self.assertEqual(response.status_code, 200)
 
 class ApiTest(TestCase):
     def setUp(self):

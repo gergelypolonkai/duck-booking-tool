@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from django.test import TestCase, Client
-from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
+from django.test import TestCase, Client
+from django.utils import timezone
 
 import datetime
 
@@ -296,3 +297,11 @@ class BookingTest(TestCase):
 
     def test_unbooked_duck(self):
         self.assertEqual(self.unbooked_duck.booked_by(), None)
+
+class ReverseTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+    def test_reverse_js(self):
+        response = self.client.get(reverse('js_reverse'))
+        self.assertEqual(response.status_code, 200)
