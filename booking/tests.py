@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.test import TestCase, Client
 from django.utils import timezone
 from django.conf import settings
@@ -260,7 +261,7 @@ class SimilarCompTest(TestCase):
         l = Competence.get_similar_comps('pzthon')
         self.assertEquals(len(l), 1)
 
-        l = Competence.get_similar_comps('kreativitás')
+        l = Competence.get_similar_comps(u'kreativitás')
         self.assertEqual(len(l), 1)
 
     def test_bad_similar_competence(self):
