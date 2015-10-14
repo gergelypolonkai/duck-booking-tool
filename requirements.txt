@@ -1,5 +1,6 @@
-Django>=1.8
+Django==1.8.5
 WebTest==2.0.17
 django-webtest==1.7.7
 django-js-reverse==0.3.3
+djangorestframework==3.2.4
 fuzzywuzzy==0.4.0
