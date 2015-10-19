@@ -7,8 +7,9 @@ from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .serializers import DuckSerializer, CompetenceSerializer
-from booking.models import Duck, Competence, Booking
+from .serializers import DuckSerializer, CompetenceSerializer, \
+                         DuckCompetenceSerializer
+from booking.models import Duck, Competence, Booking, DuckCompetence
 
 class DuckViewSet(viewsets.ModelViewSet):
     serializer_class = DuckSerializer
@@ -30,7 +31,7 @@ class DuckViewSet(viewsets.ModelViewSet):
         comp_level = 0
 
         # Check if the duck has the requested competence
-        dcomp_list = duck.duckcompetence_set.filter(comp=competence)
+        dcomp_list = duck.competences.filter(comp=competence)
 
         if len(dcomp_list) < 1:
             comp_level = 0
@@ -54,3 +55,7 @@ class DuckViewSet(viewsets.ModelViewSet):
     @list_route(methods=['post'], permission_classes=[IsAuthenticated])
     def donate(self, request):
         return Response({'Woot!'})
+
+class CompetenceViewSet(viewsets.ModelViewSet):
+    serializer_class = CompetenceSerializer
+    queryset = Competence.objects.all()

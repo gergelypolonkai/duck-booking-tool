@@ -18,36 +18,31 @@ class DuckClassTest(WebTest):
         self.user = User.objects.create_user(username='test',
                                              password='test')
 
-        spec = Species(name = 'duck')
-        spec.save()
+        spec = Species.objects.create(name = 'duck')
 
-        loc = Location(name = 'temp')
-        loc.save()
+        loc = Location.objects.create(name = 'temp')
 
-        self.comp_bad = Competence(name = 'test1', added_by = self.user)
-        self.comp_bad.save()
+        self.comp_bad = Competence.objects.create(name = 'test1',
+                                                  added_by = self.user)
 
-        self.comp_good = Competence(name = 'test2',
-                                    added_by = self.user)
-        self.comp_good.save()
+        self.comp_good = Competence.objects.create(name = 'test2',
+                                                   added_by = self.user)
 
-        self.duck = Duck(species = spec,
-                         location = loc,
-                         donated_by = self.user,
-                         color='123456')
-        self.duck.save()
+        self.duck = Duck.objects.create(species = spec,
+                                        name='test duck',
+                                        location = loc,
+                                        donated_by = self.user,
+                                        color='123456')
 
-        dcomp = DuckCompetence(duck = self.duck,
-                               comp = self.comp_bad,
-                               up_minutes = bad_minutes,
-                               down_minutes = 0)
-        dcomp.save()
+        DuckCompetence.objects.create(duck = self.duck,
+                                      comp = self.comp_bad,
+                                      up_minutes = bad_minutes,
+                                      down_minutes = 0)
 
-        dcomp = DuckCompetence(duck = self.duck,
-                               comp = self.comp_good,
-                               up_minutes = good_minutes,
-                               down_minutes = 0)
-        dcomp.save()
+        DuckCompetence.objects.create(duck = self.duck,
+                                      comp = self.comp_good,
+                                      up_minutes = good_minutes,
+                                      down_minutes = 0)
 
     def test_book_nonlogged(self):
         page = self.app.post('/api/v1/ducks/1/book/', expect_errors=True)
@@ -138,6 +133,7 @@ class DuckClassTest(WebTest):
         self.assertEqual(200, page.status_code)
 
         page_json = json.loads(page.content)
-        self.assertEqual(len(page_json), 3)
 
+        self.assertEquals('test duck', page_json['name'])
         self.assertEquals('123456', page_json['color'])
+        self.assertEqual(2, len(page_json['competences']))

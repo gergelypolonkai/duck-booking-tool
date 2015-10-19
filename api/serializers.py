@@ -2,7 +2,7 @@
 from django.core.exceptions import ImproperlyConfigured
 from rest_framework import serializers
 
-from booking.models import Duck
+from booking.models import Duck, Competence, DuckCompetence
 
 class NamespacedSerializer(serializers.HyperlinkedModelSerializer):
     def __init__(self, *args, **kwargs):
@@ -10,6 +10,9 @@ class NamespacedSerializer(serializers.HyperlinkedModelSerializer):
             raise ImproperlyConfigured("namespace must be set!")
 
         self.url_namespace = self.Meta.url_namespace
+
+        self.url_namespace = kwargs.pop('url_namespace',
+                                        self.url_namespace)
 
         if not self.url_namespace.endswith(':'):
             self.url_namespace += ':'
@@ -28,8 +31,24 @@ class NamespacedSerializer(serializers.HyperlinkedModelSerializer):
 
         return field_class, field_kwargs
 
+class CompetenceSerializer(NamespacedSerializer):
+    class Meta:
+        url_namespace = 'api'
+        model = Competence
+        fields = ('url', 'name',)
+
+class DuckCompetenceSerializer(NamespacedSerializer):
+    comp = CompetenceSerializer()
+
+    class Meta:
+        url_namespace = 'api'
+        model = DuckCompetence
+        fields = ('comp', 'up_minutes', 'down_minutes',)
+
 class DuckSerializer(NamespacedSerializer):
+    competences = DuckCompetenceSerializer(many=True)
+
     class Meta:
         url_namespace = 'api'
         model = Duck
-        fields = ('url', 'name', 'color',)
+        fields = ('url', 'name', 'color', 'competences',)
