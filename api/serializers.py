@@ -7,4 +7,8 @@ class DuckSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Duck
         fields = ('url', 'name', 'color',)
-        view_name = 'api:duck-detail'
+        extra_kwargs = {
+            'url': {
+                'view_name': 'api:duck-detail',
+            }
+        }
