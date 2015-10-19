@@ -1,65 +1,22 @@
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.conf import settings
+from django_webtest import WebTest
 
 import json
 
 from booking.ducklevel import level_to_up_minutes
 from booking.models import Species, Location, Duck, Competence, DuckCompetence
 
-def get_response_encoding(response):
-    encoding = settings.DEFAULT_CHARSET
-
-    if response.has_header('content-encoding'):
-        encoding = response['content-encoding']
-
-    return encoding
-
-class ApiTest(TestCase):
-    def setUp(self):
-        self.client = Client()
-
-        species = Species(name = 'duck')
-        species.save()
-
-        loc = Location(name = 'test')
-        loc.save()
-
-        user = User()
-        user.save()
-
-        self.duck = Duck(
-            species = species,
-            location = loc,
-            donated_by = user)
-        self.duck.save()
-
-        comp = Competence(name = 'test', added_by = user)
-        comp.save()
-
-        duckcomp = DuckCompetence(duck = self.duck, comp = comp)
-        duckcomp.save()
-
-    def test_duck_comp_list(self):
-        response = self.client.get('/api/v1/duck/1/competence.json')
-        self.assertEqual(response.status_code, 200)
-
-        self.assertEqual(len(response.context['comp_list']), 1)
-
-class DuckBookingTest(TestCase):
-    username = 'admin'
-    password = 'password'
+class DuckClassTest(WebTest):
+    csrf_checks = False
 
     def setUp(self):
         good_minutes = level_to_up_minutes(settings.COMP_WARN_LEVEL + 1)
         bad_minutes = level_to_up_minutes(settings.COMP_WARN_LEVEL)
-        self.duck_id = 1
-        self.comp_id = 1
 
-        self.admin = User.objects.create_user(
-            username = self.username,
-            password = self.password)
-        self.admin.save()
+        self.user = User.objects.create_user(username='test',
+                                             password='test')
 
         spec = Species(name = 'duck')
         spec.save()
@@ -67,120 +24,120 @@ class DuckBookingTest(TestCase):
         loc = Location(name = 'temp')
         loc.save()
 
-        self.comp_bad = Competence(
-            pk = self.comp_id,
-            name = 'test1',
-            added_by = self.admin)
-        self.comp_id += 1
+        self.comp_bad = Competence(name = 'test1', added_by = self.user)
         self.comp_bad.save()
 
-        self.comp_good = Competence(
-            pk = self.comp_id,
-            name = 'test2',
-            added_by = self.admin)
-        self.comp_id += 1
+        self.comp_good = Competence(name = 'test2',
+                                    added_by = self.user)
         self.comp_good.save()
 
-        self.duck = Duck(
-            pk = self.duck_id,
-            species = spec,
-            location = loc,
-            donated_by = self.admin)
-        self.duck_id += 1
+        self.duck = Duck(species = spec,
+                         location = loc,
+                         donated_by = self.user,
+                         color='123456')
         self.duck.save()
 
-        dcomp = DuckCompetence(
-            duck = self.duck,
-            comp = self.comp_bad,
-            up_minutes = bad_minutes,
-            down_minutes = 0)
+        dcomp = DuckCompetence(duck = self.duck,
+                               comp = self.comp_bad,
+                               up_minutes = bad_minutes,
+                               down_minutes = 0)
         dcomp.save()
 
-        dcomp = DuckCompetence(
-            duck = self.duck,
-            comp = self.comp_good,
-            up_minutes = good_minutes,
-            down_minutes = 0)
+        dcomp = DuckCompetence(duck = self.duck,
+                               comp = self.comp_good,
+                               up_minutes = good_minutes,
+                               down_minutes = 0)
         dcomp.save()
-
-        self.client = Client()
-
-    def send_booking_json(self, json_data):
-        return self.client.post(
-            '/api/v1/duck/book/',
-            json.dumps(json_data),
-            HTTP_X_REQUESTED_WITH = 'XMLHttpRequest',
-            content_type = 'application/json')
 
     def test_book_nonlogged(self):
-        self.client.logout()
-
-        response = self.send_booking_json({
-            "duck_id": self.duck.pk,
-            "comp_id": self.comp_good.pk
-        })
-
-        self.assertEqual(response.status_code, 401)
+        page = self.app.post('/api/v1/ducks/1/book/', expect_errors=True)
+        self.assertEqual(page.status_code, 403)
 
     def test_book_nonexist(self):
-        self.client.login(username = self.username, password = self.password)
-
-        # Try to book a non-existing Duck
-        response = self.send_booking_json({
-            "duck_id": self.duck.pk + 1,
-            "comp_id": self.comp_good.pk
-        })
-        self.assertEqual(response.status_code, 404)
+        # Try to book a non-existing duck
+        page = self.app.post(
+            '/api/v1/ducks/9999/book/',
+            params={
+                'competence': self.comp_good.pk,
+            },
+            user=self.user,
+            expect_errors=True)
+        self.assertEqual(404, page.status_code)
 
         # Try to book an existing Duck for a non-existing competence
-        response = self.send_booking_json({
-            "duck_id": self.duck.pk,
-            "comp_id": 3
-        })
-        self.assertEqual(response.status_code, 404)
+        page = self.app.post(
+            '/api/v1/ducks/%d/book/' % self.duck.pk,
+            params={
+                'competence': 9999
+            },
+            user=self.user,
+            expect_errors=True)
+        self.assertEqual(404, page.status_code)
 
     def test_book_warn(self):
         test_data = {
-            "duck_id": self.duck.pk,
-            "comp_id": self.comp_bad.pk
+            'competence': self.comp_bad.pk,
         }
-        self.client.login(username = self.username, password = self.password)
+        url = '/api/v1/ducks/%d/book/' % self.duck.pk
 
-        response = self.send_booking_json(test_data)
-        self.assertEqual(response.status_code, 200)
+        page = self.app.post(url, params=test_data, user=self.user)
+        self.assertEquals(200, page.status_code)
 
-        j = json.loads(response.content.decode(get_response_encoding(response)))
-        self.assertIn('success', j)
-        self.assertEquals(j['success'], 1)
+        page_json = json.loads(page.content)
+        self.assertEquals(page_json['status'], 'bad-comp')
 
         test_data['force'] = 1
 
-        response = self.send_booking_json(test_data)
-        self.assertEqual(response.status_code, 200)
+        page = self.app.post(url, params=test_data, user=self.user)
+        self.assertEqual(200, page.status_code)
 
-        j = json.loads(response.content.decode(get_response_encoding(response)))
-        self.assertIn('success', j)
-        self.assertEquals(j['success'], 2)
+        page_json = json.loads(page.content)
+        self.assertEquals(page_json['status'], 'ok')
 
     def test_book_good(self):
         test_data = {
-            "duck_id": self.duck.pk,
-            "comp_id": self.comp_good.pk
+            "competence": self.comp_good.pk
         }
-        self.client.login(username = self.username, password = self.password)
 
+        url = '/api/v1/ducks/%d/book/' % self.duck.pk
         # Book the duck
-        response = self.send_booking_json(test_data)
-        self.assertEqual(response.status_code, 200)
+        page = self.app.post(url, params=test_data, user=self.user)
+        self.assertEquals(200, page.status_code)
 
-        j = json.loads(response.content.decode(get_response_encoding(response)))
-        self.assertIn('success', j)
-        self.assertEqual(j['success'], 2)
+        page_json = json.loads(page.content)
+        self.assertEqual(page_json['status'], 'ok')
 
         # Try to book again, it should fail
-        response = self.send_booking_json(test_data)
-        self.assertEqual(response.status_code, 200)
+        page = self.app.post(url, params=test_data, user=self.user)
+        self.assertEqual(200, page.status_code)
 
-        j = json.loads(response.content.decode(get_response_encoding(response)))
-        self.assertIn('success', j)
-        self.assertEqual(j['success'], 0)
+        page_json = json.loads(page.content)
+        self.assertEqual('already-booked', page_json['status'])
+
+    def test_duck_donation(self):
+        # Duck donation should not be allowed without logging in
+        page = self.app.get('/api/v1/ducks/donate/', expect_errors=True)
+        self.assertEquals(page.status_code, 403)
+
+        # Duck donation should not be allowed withoud logging in
+        page = self.app.post('/api/v1/ducks/donate/', expect_errors=True)
+        self.assertEquals(page.status_code, 403)
+
+        page = self.app.post(
+            '/api/v1/ducks/donate/',
+            params={
+                'species': 1,
+                'color': '123456',
+            },
+            user=self.user)
+        page_json = json.loads(page.content)
+
+    def test_duck_details(self):
+        url = '/api/v1/ducks/%d/' % self.duck.pk
+        page = self.app.get(url)
+        self.assertEqual(200, page.status_code)
+
+        page_json = json.loads(page.content)
+        self.assertEqual(len(page_json), 3)
+
+        self.assertEquals('123456', page_json['color'])
