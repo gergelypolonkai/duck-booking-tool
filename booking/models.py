@@ -12,7 +12,7 @@ from .ducklevel import minutes_to_level
 class Species(models.Model):
     """Model to hold the Ducks’ species"""
 
-    name = models.CharField(max_length = 40, unique = True)
+    name = models.CharField(max_length=40, unique=True)
 
     def __str__(self):
         return self.name
@@ -20,7 +20,7 @@ class Species(models.Model):
 class Location(models.Model):
     """Model to hold the possible locations of the Ducks"""
 
-    name = models.CharField(max_length = 50)
+    name = models.CharField(max_length=50)
 
     def __str__(self):
         return self.name
@@ -28,8 +28,8 @@ class Location(models.Model):
 class Competence(models.Model):
     """Model to hold Duck competences"""
 
-    name = models.CharField(max_length = 255, unique = True)
-    added_at = models.DateTimeField(default = timezone.now)
+    name = models.CharField(max_length=255, unique=True)
+    added_at = models.DateTimeField(default=timezone.now)
     added_by = models.ForeignKey(User)
 
     def __str__(self):
@@ -37,7 +37,7 @@ class Competence(models.Model):
 
     @classmethod
     def get_similar_comps(cls, name):
-        comps = cls.objects.values_list('name', flat = True)
+        comps = cls.objects.values_list('name', flat=True)
         ret = ()
 
         for c in comps:
@@ -52,18 +52,18 @@ class Competence(models.Model):
 class Duck(models.Model):
     """Model to hold Duck data"""
 
-    name = models.CharField(max_length = 80, null = True, blank = True)
-    color = models.CharField(max_length = 6)
+    name = models.CharField(max_length=80, null=True, blank=True)
+    color = models.CharField(max_length=6)
     species = models.ForeignKey(Species)
     location = models.ForeignKey(Location)
-    comps = models.ManyToManyField(Competence, through = 'DuckCompetence')
+    comps = models.ManyToManyField(Competence, through='DuckCompetence')
     donated_by = models.ForeignKey(User)
-    donated_at = models.DateTimeField(default = timezone.now)
-    adopted_by = models.ForeignKey(User, related_name = 'adopted_ducks', null = True)
-    adopted_at = models.DateTimeField(null = True)
-    bookings = models.ManyToManyField(User, through = 'Booking', related_name = '+')
-    on_holiday_since = models.DateTimeField(null = True)
-    on_holiday_until = models.DateTimeField(null = True)
+    donated_at = models.DateTimeField(default=timezone.now)
+    adopted_by = models.ForeignKey(User, related_name='adopted_ducks', null=True, blank=True)
+    adopted_at = models.DateTimeField(null=True, blank=True)
+    bookings = models.ManyToManyField(User, through='Booking', related_name='+')
+    on_holiday_since = models.DateTimeField(null=True, blank=True)
+    on_holiday_until = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         if self.name == None or self.name == '':
@@ -90,7 +90,7 @@ class Duck(models.Model):
         return Booking.duck_booking_time(self) / Booking.total_booking_time()
 
     def booked_by(self):
-        l = self.booking_set.filter(end_ts = None)
+        l = self.booking_set.filter(end_ts=None)
 
         if len(l) == 0:
             return None
@@ -104,27 +104,27 @@ class DuckName(models.Model):
     """Model to hold name suggestions for Ducks"""
 
     duck = models.ForeignKey(Duck)
-    name = models.CharField(max_length = 60)
+    name = models.CharField(max_length=60)
     suggested_by = models.ForeignKey(User)
-    suggested_at = models.DateTimeField(default = timezone.now)
-    closed_by = models.ForeignKey(User, related_name = '+')
-    closed_at = models.DateTimeField(null = True)
+    suggested_at = models.DateTimeField(default=timezone.now)
+    closed_by = models.ForeignKey(User, related_name='+')
+    closed_at = models.DateTimeField(null=True)
 
 class DuckNameVote(models.Model):
     """Model to hold votes to Duck names"""
 
     duck_name = models.ForeignKey(DuckName)
-    vote_timestamp = models.DateTimeField(default = timezone.now)
+    vote_timestamp = models.DateTimeField(default=timezone.now)
     voter = models.ForeignKey(User)
-    upvote = models.BooleanField(default = True)
+    upvote = models.BooleanField(default=True)
 
 class DuckCompetence(models.Model):
     """Duck competence governor table"""
 
     duck = models.ForeignKey(Duck)
     comp = models.ForeignKey(Competence)
-    up_minutes = models.IntegerField(default = 0)
-    down_minutes = models.IntegerField(default = 0)
+    up_minutes = models.IntegerField(default=0)
+    down_minutes = models.IntegerField(default=0)
 
     def level(self):
         return minutes_to_level(self.up_minutes, self.down_minutes)
@@ -138,14 +138,26 @@ class Booking(models.Model):
     duck = models.ForeignKey(Duck)
     user = models.ForeignKey(User)
     comp_req = models.ForeignKey(Competence)
-    start_ts = models.DateTimeField(default = timezone.now)
-    end_ts = models.DateTimeField(null = True, blank = True)
-    successful = models.BooleanField(default = True)
+    start_ts = models.DateTimeField(default=timezone.now)
+    end_ts = models.DateTimeField(null=True, blank=True)
+    successful = models.BooleanField(default=True)
 
     @classmethod
     def total_booking_time(cls):
-        return cls.objects.filter(start_ts__isnull = False, end_ts__isnull = False).extra(select = {'amount': 'sum(strftime(%s, end_ts) - strftime(%s, start_ts))'}, select_params = ('%s', '%s'))[0].amount
+        return cls.objects.filter(
+            start_ts__isnull=False,
+            end_ts__isnull=False).extra(
+                select={
+                    'amount': 'sum(strftime(%s, end_ts) - strftime(%s, start_ts))'
+                },
+                select_params=('%s', '%s'))[0].amount
 
     @classmethod
     def duck_booking_time(cls, duck):
-        return cls.objects.filter(start_ts__isnull = False, end_ts__isnull = False, duck = duck).extra(select = {'amount': 'sum(strftime(%s, end_ts) - strftime(%s, start_ts))'}, select_params = ('%s', '%s'))[0].amount
+        return cls.objects.filter(
+            start_ts__isnull=False,
+            end_ts__isnull=False, duck = duck).extra(
+                select={
+                    'amount': 'sum(strftime(%s, end_ts) - strftime(%s, start_ts))'
+                },
+                select_params=('%s', '%s'))[0].amount
