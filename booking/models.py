@@ -121,8 +121,8 @@ class DuckNameVote(models.Model):
 class DuckCompetence(models.Model):
     """Duck competence governor table"""
 
-    duck = models.ForeignKey(Duck)
-    comp = models.ForeignKey(Competence)
+    duck = models.ForeignKey(Duck, related_name='competences')
+    comp = models.ForeignKey(Competence, related_name='ducks')
     up_minutes = models.IntegerField(default=0)
     down_minutes = models.IntegerField(default=0)
 
