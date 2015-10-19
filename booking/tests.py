@@ -297,11 +297,3 @@ class BookingTest(TestCase):
 
     def test_unbooked_duck(self):
         self.assertEqual(self.unbooked_duck.booked_by(), None)
-
-class ReverseTest(TestCase):
-    def setUp(self):
-        self.client = Client()
-
-    def test_reverse_js(self):
-        response = self.client.get(reverse('js_reverse'))
-        self.assertEqual(response.status_code, 200)
