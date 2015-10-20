@@ -1,4 +1,7 @@
-from django.conf.urls import patterns, url, include
+# -*- coding: utf-8
+"""
+URL definitions for version 1 of the Duck Booking Tool API
+"""
 
 from rest_framework import routers
 

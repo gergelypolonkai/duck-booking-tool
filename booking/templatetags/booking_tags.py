@@ -1,17 +1,31 @@
+# -*- coding: utf-8
+"""
+Template tags for the booking templates
+"""
+
 from django import template
 import math
 
 register = template.Library()
 
-def is_number(s):
+def is_number(string):
+    """
+    Check if s is a number in string representation
+    """
+
     try:
-        float(s)
+        float(string)
+
         return True
     except ValueError:
         return False
 
 @register.filter
-def age_format(value, arg = None):
+def age_format(value, arg=None):
+    """
+    Create human readable string from the duck age
+    """
+
     if not is_number(value):
         return value
 
@@ -30,7 +44,7 @@ def age_format(value, arg = None):
     remainder = remainder % 2592000
 
     if months > 0:
-        if (ret != ""):
+        if ret != "":
             ret += " "
 
         ret += u"%d month%s" % (months, "" if months == 1 else "s")
@@ -45,7 +59,7 @@ def age_format(value, arg = None):
         days = 1
 
     if days > 0:
-        if (ret != ""):
+        if ret != "":
             ret += " "
 
         ret += u"%d day%s" % (days, "" if days == 1 else "s")
@@ -60,7 +74,7 @@ def age_format(value, arg = None):
     remainder = remainder % 3600
 
     if hours > 0:
-        if (ret != ""):
+        if ret != "":
             ret += " "
 
         ret += u"%d hour%s" % (hours, "" if hours == 1 else "s")
@@ -68,7 +82,7 @@ def age_format(value, arg = None):
     minutes = math.floor(remainder / 60)
 
     if minutes > 0:
-        if (ret != ""):
+        if ret != "":
             ret += " "
 
         ret += u"%d minute%s" % (minutes, "" if minutes == 1 else "s")
@@ -76,7 +90,7 @@ def age_format(value, arg = None):
     seconds = round(remainder % 60)
 
     if seconds > 0:
-        if (ret != ""):
+        if ret != "":
             ret += " "
 
         ret += u"%d second%s" % (seconds, "" if seconds == 1 else "s")

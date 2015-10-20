@@ -1,5 +1,8 @@
 # -*- coding: utf-8
-from django.test import TestCase, Client
+"""
+Test cases for API calls
+"""
+
 from django.contrib.auth.models import User
 from django.conf import settings
 from django_webtest import WebTest
@@ -10,6 +13,10 @@ from booking.ducklevel import level_to_up_minutes
 from booking.models import Species, Location, Duck, Competence, DuckCompetence
 
 class DuckClassTest(WebTest):
+    """
+    Test case for duck related API calls
+    """
+
     csrf_checks = False
 
     def setUp(self):
@@ -46,10 +53,18 @@ class DuckClassTest(WebTest):
                                       down_minutes=0)
 
     def test_book_nonlogged(self):
+        """
+        Test booking without logging in
+        """
+
         page = self.app.post('/api/v1/ducks/1/book/', expect_errors=True)
         self.assertEqual(page.status_code, 403)
 
     def test_book_nonexist(self):
+        """
+        Test booking a non-existing duck
+        """
+
         # Try to book a non-existing duck
         page = self.app.post(
             '/api/v1/ducks/9999/book/',
@@ -71,6 +86,10 @@ class DuckClassTest(WebTest):
         self.assertEqual(404, page.status_code)
 
     def test_book_warn(self):
+        """
+        Test duck booking for a competence the duck is not good at
+        """
+
         url = '/api/v1/ducks/%d/book/' % self.duck.pk
         comp_none = Competence.objects.create(name='test3',
                                               added_by=self.user)
@@ -107,6 +126,10 @@ class DuckClassTest(WebTest):
         self.assertEquals(page_json['status'], 'ok')
 
     def test_book_good(self):
+        """
+        Test duck booking for a competence the duck is good at
+        """
+
         test_data = {
             "competence": self.comp_good.pk
         }
@@ -127,6 +150,10 @@ class DuckClassTest(WebTest):
         self.assertEqual('already-booked', page_json['status'])
 
     def test_duck_donation(self):
+        """
+        Test duck donating functionality
+        """
+
         # Duck donation should not be allowed without logging in
         page = self.app.get('/api/v1/ducks/donate/', expect_errors=True)
         self.assertEquals(page.status_code, 403)
@@ -135,16 +162,19 @@ class DuckClassTest(WebTest):
         page = self.app.post('/api/v1/ducks/donate/', expect_errors=True)
         self.assertEquals(page.status_code, 403)
 
-        page = self.app.post(
+        self.app.post(
             '/api/v1/ducks/donate/',
             params={
                 'species': 1,
                 'color': '123456',
             },
             user=self.user)
-        page_json = json.loads(page.content)
 
     def test_duck_details(self):
+        """
+        Test duck details view
+        """
+
         url = '/api/v1/ducks/%d/' % self.duck.pk
         page = self.app.get(url)
         self.assertEqual(200, page.status_code)

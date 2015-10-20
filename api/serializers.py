@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
+"""
+Serializers for the Duck Booking Tool API
+"""
+
 from django.core.exceptions import ImproperlyConfigured
 from rest_framework import serializers
 
 from booking.models import Duck, Competence, DuckCompetence
 
 class NamespacedSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    HyperlinkedModelSerializer with URL namespace support
+    """
+
     def __init__(self, *args, **kwargs):
         if not hasattr(self.Meta, 'url_namespace') or self.Meta.url_namespace is None:
             raise ImproperlyConfigured("namespace must be set!")
@@ -17,7 +25,7 @@ class NamespacedSerializer(serializers.HyperlinkedModelSerializer):
         if not self.url_namespace.endswith(':'):
             self.url_namespace += ':'
 
-        return super(NamespacedSerializer, self).__init__(*args, **kwargs)
+        super(NamespacedSerializer, self).__init__(*args, **kwargs)
 
     def build_url_field(self, field_name, model_class):
         field_class, field_kwargs = super(NamespacedSerializer, self) \
@@ -32,12 +40,20 @@ class NamespacedSerializer(serializers.HyperlinkedModelSerializer):
         return field_class, field_kwargs
 
 class CompetenceSerializer(NamespacedSerializer):
+    """
+    Serializer for Competence objects
+    """
+
     class Meta:
         url_namespace = 'api'
         model = Competence
         fields = ('url', 'name',)
 
 class DuckCompetenceSerializer(NamespacedSerializer):
+    """
+    Serializer for DuckCompetence objects
+    """
+
     comp = CompetenceSerializer()
 
     class Meta:
@@ -46,6 +62,10 @@ class DuckCompetenceSerializer(NamespacedSerializer):
         fields = ('comp', 'up_minutes', 'down_minutes',)
 
 class DuckSerializer(NamespacedSerializer):
+    """
+    Serializer for Duck objects
+    """
+
     competences = DuckCompetenceSerializer(many=True)
 
     class Meta:

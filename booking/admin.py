@@ -1,5 +1,12 @@
+# -*- coding: utf-8
+"""
+Administration site definition for the Duck Booking Tool
+"""
+
 from django.contrib import admin
-from booking.models import Species, Location, Competence, Duck, Booking, DuckCompetence, DuckName, DuckNameVote
+from booking.models import Species, Location, Competence, Duck, \
+                           Booking, DuckCompetence, DuckName, \
+                           DuckNameVote
 
 admin.site.register(Species)
 admin.site.register(Location)
