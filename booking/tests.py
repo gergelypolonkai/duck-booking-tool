@@ -271,29 +271,37 @@ class SimilarCompTest(TestCase):
 
 class BookingTest(TestCase):
     def setUp(self):
-        spec = Species(name = 'test')
-        spec.save()
+        spec = Species.objects.create(name='test')
 
-        loc = Location(name = 'test')
-        loc.save()
+        loc = Location.objects.create(name='test')
 
-        user = User(username = 'test')
-        user.save()
+        self.user = User.objects.create_user(username='test')
 
-        self.booked_duck = Duck(species = spec, location = loc, donated_by = user)
-        self.booked_duck.save()
+        self.booked_duck = Duck.objects.create(species=spec,
+                                               location=loc,
+                                               donated_by=self.user)
 
-        comp = Competence(name = 'test', added_by = user)
-        comp.save()
+        self.comp = Competence.objects.create(name='test',
+                                              added_by=self.user)
 
-        booking = Booking(duck = self.booked_duck, user = user, comp_req = comp)
-        booking.save()
+        booking = Booking.objects.create(duck=self.booked_duck,
+                                         user=self.user,
+                                         comp_req=self.comp)
 
-        self.unbooked_duck = Duck(species = spec, location = loc, donated_by = user)
-        self.unbooked_duck.save()
+        self.unbooked_duck = Duck.objects.create(species=spec,
+                                                 location=loc,
+                                                 donated_by=self.user)
 
     def test_booked_duck(self):
         self.assertNotEqual(self.booked_duck.booked_by(), None)
 
     def test_unbooked_duck(self):
         self.assertEqual(self.unbooked_duck.booked_by(), None)
+
+    def test_multiple_booking(self):
+        Booking.objects.create(duck=self.booked_duck,
+                               user=self.user,
+                               comp_req=self.comp)
+
+        with self.assertRaises(RuntimeError):
+            self.booked_duck.booked_by()

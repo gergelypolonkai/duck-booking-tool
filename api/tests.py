@@ -1,3 +1,4 @@
+# -*- coding: utf-8
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -18,31 +19,31 @@ class DuckClassTest(WebTest):
         self.user = User.objects.create_user(username='test',
                                              password='test')
 
-        spec = Species.objects.create(name = 'duck')
+        spec = Species.objects.create(name='duck')
 
-        loc = Location.objects.create(name = 'temp')
+        loc = Location.objects.create(name='temp')
 
-        self.comp_bad = Competence.objects.create(name = 'test1',
-                                                  added_by = self.user)
+        self.comp_bad = Competence.objects.create(name='test1',
+                                                  added_by=self.user)
 
-        self.comp_good = Competence.objects.create(name = 'test2',
-                                                   added_by = self.user)
+        self.comp_good = Competence.objects.create(name='test2',
+                                                   added_by=self.user)
 
-        self.duck = Duck.objects.create(species = spec,
+        self.duck = Duck.objects.create(species=spec,
                                         name='test duck',
-                                        location = loc,
-                                        donated_by = self.user,
+                                        location=loc,
+                                        donated_by=self.user,
                                         color='123456')
 
-        DuckCompetence.objects.create(duck = self.duck,
-                                      comp = self.comp_bad,
-                                      up_minutes = bad_minutes,
-                                      down_minutes = 0)
+        DuckCompetence.objects.create(duck=self.duck,
+                                      comp=self.comp_bad,
+                                      up_minutes=bad_minutes,
+                                      down_minutes=0)
 
-        DuckCompetence.objects.create(duck = self.duck,
-                                      comp = self.comp_good,
-                                      up_minutes = good_minutes,
-                                      down_minutes = 0)
+        DuckCompetence.objects.create(duck=self.duck,
+                                      comp=self.comp_good,
+                                      up_minutes=good_minutes,
+                                      down_minutes=0)
 
     def test_book_nonlogged(self):
         page = self.app.post('/api/v1/ducks/1/book/', expect_errors=True)
@@ -70,10 +71,14 @@ class DuckClassTest(WebTest):
         self.assertEqual(404, page.status_code)
 
     def test_book_warn(self):
-        test_data = {
-            'competence': self.comp_bad.pk,
-        }
         url = '/api/v1/ducks/%d/book/' % self.duck.pk
+        comp_none = Competence.objects.create(name='test3',
+                                              added_by=self.user)
+
+        # Book for a competence the duck doesn’t have at all
+        test_data = {
+            'competence': comp_none.pk,
+        }
 
         page = self.app.post(url, params=test_data, user=self.user)
         self.assertEquals(200, page.status_code)
@@ -81,6 +86,18 @@ class DuckClassTest(WebTest):
         page_json = json.loads(page.content)
         self.assertEquals(page_json['status'], 'bad-comp')
 
+        # Book for a competence with low level
+        test_data = {
+            'competence': self.comp_bad.pk,
+        }
+
+        page = self.app.post(url, params=test_data, user=self.user)
+        self.assertEquals(200, page.status_code)
+
+        page_json = json.loads(page.content)
+        self.assertEquals(page_json['status'], 'bad-comp')
+
+        # Forcibly book for a competence with low level
         test_data['force'] = 1
 
         page = self.app.post(url, params=test_data, user=self.user)
