@@ -7,3 +7,4 @@
 /htmlcov/
 /test_failures.txt
 /test_rerun.txt
+/pylint/

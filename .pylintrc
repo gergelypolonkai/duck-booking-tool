@@ -1,0 +1,8 @@
+[MASTER]
+
+load-plugins=pylint_django
+
+[REPORTS]
+
+files-output=yes
+
