@@ -24,7 +24,7 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_FOR')
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_FOR', 'https')
 
 # Application definition
 
@@ -59,7 +59,7 @@ WSGI_APPLICATION = 'duckbook.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
 
-os.environ.setdefault('DATABASE_URL', 'sqlite://' + os.path.join(BASE_DIR, 'db.sqlite3')
+os.environ.setdefault('DATABASE_URL', 'sqlite://' + os.path.join(BASE_DIR, 'db.sqlite3'))
 DATABASES = {
     'default': dj_database_url.config()
 }
