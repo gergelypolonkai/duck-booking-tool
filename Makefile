@@ -10,9 +10,9 @@ test:
 	@echo "Coverage data is available in HTML format under the htmlcov directory"
 
 lint:
-	rm -rf pylint
+	rm -rf pylint/* || true
 	pylint --rcfile=.pylintrc $(MODULES) || true
-	mkdir pylint
+	mkdir pylint || true
 	sh -c 'for file in pylint_*; do \
 	    o="$${file#pylint_}"; \
 	    mv "$$file" pylint/$$o; \
