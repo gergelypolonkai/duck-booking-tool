@@ -1,4 +1,4 @@
 [report]
 omit =
     venv/*
-    ducktool/wsgi.py
+    duckbook/wsgi.py
