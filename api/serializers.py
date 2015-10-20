@@ -14,7 +14,10 @@ class NamespacedSerializer(serializers.HyperlinkedModelSerializer):
     """
 
     def __init__(self, *args, **kwargs):
-        if not hasattr(self.Meta, 'url_namespace') or self.Meta.url_namespace is None:
+        if not hasattr(self, 'Meta') \
+           or not hasattr(self.Meta, 'url_namespace') \
+           or self.Meta.url_namespace is None \
+           or self.Meta.url_namespace == '':
             raise ImproperlyConfigured("namespace must be set!")
 
         self.url_namespace = self.Meta.url_namespace

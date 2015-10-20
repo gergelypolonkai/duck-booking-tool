@@ -140,15 +140,23 @@ class DuckName(models.Model):
     """
 
     duck = models.ForeignKey(Duck)
-    name = models.CharField(max_length=60)
+    name = models.CharField(max_length=60, null=False)
     suggested_by = models.ForeignKey(User)
     suggested_at = models.DateTimeField(default=timezone.now)
-    closed_by = models.ForeignKey(User, related_name='+')
-    closed_at = models.DateTimeField(null=True)
+    closed_by = models.ForeignKey(User,
+                                  related_name='+',
+                                  null=True,
+                                  blank=True)
+    closed_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return "{0}, suggested by {1}".format(self.name,
+        ret =  "{0}, suggested by {1}".format(self.name,
                                               self.suggested_by)
+
+        if self.closed_by:
+            ret += " <closed>"
+
+        return ret
 
 @python_2_unicode_compatible
 class DuckNameVote(models.Model):
@@ -163,7 +171,7 @@ class DuckNameVote(models.Model):
 
     def __str__(self):
         return "{0} voted {1} for {2}".format(self.voter,
-                                              "up" if upvote else "down",
+                                              "up" if self.upvote else "down",
                                               self.duck_name)
 
 @python_2_unicode_compatible
@@ -235,6 +243,7 @@ class Booking(models.Model):
                 select_params=('%s', '%s'))[0].amount
 
     def __str__(self):
-        return "{0} booked by {1} since {2}".format(self.duck,
-                                                    self.user,
-                                                    self.start_ts)
+        return "{0} booked by {1} for {2} since {3}".format(self.duck,
+                                                            self.user,
+                                                            self.comp_req,
+                                                            self.start_ts)

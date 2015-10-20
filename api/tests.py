@@ -3,14 +3,50 @@
 Test cases for API calls
 """
 
-from django.contrib.auth.models import User
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.exceptions import ImproperlyConfigured
+from django.test import TestCase
 from django_webtest import WebTest
 
 import json
 
+from .serializers import NamespacedSerializer
 from booking.ducklevel import level_to_up_minutes
 from booking.models import Species, Location, Duck, Competence, DuckCompetence
+
+class MetalessNamespacedSerializer(NamespacedSerializer):
+    pass
+
+class MissingNamespacedSerializer(NamespacedSerializer):
+    class Meta:
+        pass
+
+class NoneNamespacedSerializer(NamespacedSerializer):
+    class Meta:
+        url_namespace = None
+
+class EmptyNamespacedSerializer(NamespacedSerializer):
+    class Meta:
+        url_namespace = ''
+
+class TestNamespacedSerializer(TestCase):
+    """
+    Test namespaced Serializer
+    """
+
+    def test_no_namespace(self):
+        with self.assertRaises(ImproperlyConfigured):
+            serializer = MetalessNamespacedSerializer()
+
+        with self.assertRaises(ImproperlyConfigured):
+            serializer = MissingNamespacedSerializer()
+
+        with self.assertRaises(ImproperlyConfigured):
+            serializer = NoneNamespacedSerializer()
+
+        with self.assertRaises(ImproperlyConfigured):
+            serializer = EmptyNamespacedSerializer()
 
 class DuckClassTest(WebTest):
     """

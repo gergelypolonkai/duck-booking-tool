@@ -12,7 +12,8 @@ from django.utils import timezone
 
 from .ducklevel import level_to_up_minutes, level_to_down_minutes, minutes_to_level
 from .templatetags import booking_tags
-from .models import Duck, Competence, DuckCompetence, Species, Location, Booking
+from .models import Duck, Competence, DuckCompetence, Species, \
+                    Location, Booking, DuckName, DuckNameVote
 
 class FrontTest(TestCase):
     """
@@ -415,3 +416,78 @@ class BookingTest(TestCase):
 
         with self.assertRaises(RuntimeError):
             self.booked_duck.booked_by()
+
+class StrTest(TestCase):
+    """
+    Test case for models’ __str__() method
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='test')
+        self.location = Location.objects.create(name="A Location")
+        self.species = Species.objects.create(name="Duck")
+        self.competence = Competence.objects.create(name="Testing",
+                                                    added_by=self.user)
+
+        self.duck = Duck.objects.create(name="First Duck",
+                                        species=self.species,
+                                        location=self.location,
+                                        donated_by=self.user)
+
+    def test_location_str(self):
+        self.assertEquals("A Location", self.location.__str__())
+
+    def test_species_str(self):
+        self.assertEquals("Duck", self.species.__str__())
+
+    def test_competence_str(self):
+        self.assertEquals("Testing", self.competence.__str__())
+
+    def test_duck_str(self):
+        self.assertEquals("First Duck", self.duck.__str__())
+
+    def test_duckname_str(self):
+        name_suggestion = DuckName.objects.create(name="New Duck",
+                                                  duck=self.duck,
+                                                  suggested_by=self.user)
+        self.assertEquals("New Duck, suggested by test",
+                          name_suggestion.__str__())
+
+        name_suggestion.closed_by = self.user
+
+        self.assertEquals("New Duck, suggested by test <closed>",
+                          name_suggestion.__str__())
+
+    def test_ducknamevote_str(self):
+        name_suggestion = DuckName.objects.create(name="New Duck",
+                                                  duck=self.duck,
+                                                  suggested_by=self.user)
+
+        vote = DuckNameVote.objects.create(duck_name=name_suggestion,
+                                           voter=self.user,
+                                           upvote=False)
+
+        self.assertEquals("test voted down for New Duck, suggested by test",
+                          vote.__str__())
+
+        vote.upvote = True
+
+        self.assertEquals("test voted up for New Duck, suggested by test",
+                          vote.__str__())
+
+    def test_duckcompetence_str(self):
+        dcomp = DuckCompetence.objects.create(duck=self.duck,
+                                              comp=self.competence)
+
+        self.assertEquals("First Duck with +0/-0 minutes in Testing",
+                          dcomp.__str__())
+
+    def test_booking_str(self):
+        start = timezone.now()
+        booking = Booking.objects.create(duck=self.duck,
+                                         user=self.user,
+                                         comp_req=self.competence,
+                                         start_ts=start)
+
+        self.assertEquals("First Duck booked by test for Testing since {0}".format(start),
+                          booking.__str__())
