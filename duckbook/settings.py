@@ -24,8 +24,9 @@ DEBUG = True
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_FOR')
 
 # Application definition
 
@@ -60,12 +61,19 @@ WSGI_APPLICATION = 'duckbook.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+try:
+    import dj_database_url
+
+    DATABASES = {
+        'default': dj_database_url.config()
     }
-}
+except ImportError:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
@@ -86,6 +94,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static'
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
 
 TEST_RUNNER = 'junorunner.testrunner.TestSuiteRunner'
 
