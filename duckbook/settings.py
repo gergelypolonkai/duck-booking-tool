@@ -87,6 +87,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static'
 
+TEST_RUNNER = 'junorunner.testrunner.TestSuiteRunner'
+
 MAX_DUCK_LEVEL = 5
 COMP_WARN_LEVEL = 2
 MIN_FUZZY_SIMILARITY = 75

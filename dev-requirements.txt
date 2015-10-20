@@ -1,0 +1,4 @@
+-r requirements.txt
+coverage==4.0.1
+django-coverage-plugin==1.0
+django-juno-testrunner==0.3.1
