@@ -10,11 +10,9 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import dj_database_url
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '-j$x6v))e4=6qy0vm@!@z7-y3k18s2d2j1r&*06x9%rmm$0w1s'
@@ -61,19 +59,10 @@ WSGI_APPLICATION = 'duckbook.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
 
-try:
-    import dj_database_url
-
-    DATABASES = {
-        'default': dj_database_url.config()
-    }
-except ImportError:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        }
-    }
+os.environ.setdefault('DATABASE_URL', 'sqlite://' + os.path.join(BASE_DIR, 'db.sqlite3')
+DATABASES = {
+    'default': dj_database_url.config()
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
