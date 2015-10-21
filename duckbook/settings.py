@@ -59,7 +59,7 @@ WSGI_APPLICATION = 'duckbook.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
 
-os.environ.setdefault('DATABASE_URL', 'sqlite://' + os.path.join(BASE_DIR, 'db.sqlite3'))
+os.environ.setdefault('DATABASE_URL', 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3'))
 DATABASES = {
     'default': dj_database_url.config()
 }
@@ -84,9 +84,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static'
 
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'),
-)
+if STATIC_ROOT != 'static':
+    STATICFILES_DIRS = (
+        os.path.join(BASE_DIR, 'static'),
+    )
 
 TEST_RUNNER = 'junorunner.testrunner.TestSuiteRunner'
 
