@@ -84,7 +84,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static'
 
-if STATIC_ROOT != 'static':
+# The following will be always True on local machines, which makes
+# coverage data ugly
+if STATIC_ROOT != 'static': # pragma: no cover
     STATICFILES_DIRS = (
         os.path.join(BASE_DIR, 'static'),
     )
