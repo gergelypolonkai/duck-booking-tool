@@ -78,19 +78,15 @@ class DuckClassTest(WebTest):
         self.user = User.objects.create_user(username='test',
                                              password='test')
 
-        spec = Species.objects.create(name='duck')
-
-        loc = Location.objects.create(name='temp')
-
+        self.species = Species.objects.create(name='duck')
+        self.location = Location.objects.create(name='temp')
         self.comp_bad = Competence.objects.create(name='test1',
                                                   added_by=self.user)
-
         self.comp_good = Competence.objects.create(name='test2',
                                                    added_by=self.user)
-
-        self.duck = Duck.objects.create(species=spec,
+        self.duck = Duck.objects.create(species=self.species,
                                         name='test duck',
-                                        location=loc,
+                                        location=self.location,
                                         donated_by=self.user,
                                         color='123456')
 
@@ -201,6 +197,88 @@ class DuckClassTest(WebTest):
         page_json = json.loads(page.content)
         self.assertEqual('already-booked', page_json['status'])
 
+    def test_incomplete_donation(self):
+        """
+        Test duck donation with incomplete data
+        """
+
+        params = {
+            # No parameters
+            'none': '',
+            # Empty parameter set
+            'empty': {},
+            # Species omitted
+            'species-omit': {
+                'location': self.location.pk,
+                'color': '123456',
+            },
+            # Missing species
+            'species-notfound': {
+                'location': self.location.pk,
+                'species': 9999,
+                'color': '123456',
+                'expected-code': 404,
+                'expected-error': 'bad-species',
+            },
+            # Location omitted
+            'location-omit': {
+                'species': self.species.pk,
+                'color': '123456',
+            },
+            # Missing location
+            'location-notfound': {
+                'location': 9999,
+                'species': self.species.pk,
+                'color': '123456',
+                'expected-code': 404,
+                'expected-error': 'bad-location',
+            },
+            # Color omitted
+            'color-omit': {
+                'location': self.location.pk,
+                'species': self.species.pk,
+            },
+            # Invalid color
+            'color-invalid': {
+                'location': self.location.pk,
+                'species': self.species.pk,
+                'color': 'red',
+                'expected-error': 'bad-color',
+                'expected-code': 400,
+            },
+        }
+
+        url = '/api/v1/ducks/donate/'
+
+        for name, param in params.items():
+            if param == '':
+                expected_code = 400
+                expected_error = 'incomplete-request'
+            else:
+                expected_code = param.pop('expected-code', 400)
+                expected_error = param.pop('expected-error',
+                                           'incomplete-request')
+
+            page = self.app.post(url,
+                               params=param,
+                               expect_errors=True,
+                               user=self.user)
+
+            self.assertEquals(
+                expected_code,
+                page.status_code,
+                msg="Got unexpected status code ({}) for parameter set {}".format(
+                    page.status_code,
+                    name))
+            page_json = json.loads(page.content)
+
+            self.assertEquals(
+                expected_error,
+                page_json['status'],
+                msg="Got unexpected status code ({}) for parameter set {}".format(
+                    page.status_code,
+                    name))
+
     def test_duck_donation(self):
         """
         Test duck donating functionality
@@ -214,13 +292,23 @@ class DuckClassTest(WebTest):
         page = self.app.post('/api/v1/ducks/donate/', expect_errors=True)
         self.assertEquals(page.status_code, 403)
 
-        self.app.post(
+        color = '123456'
+        page = self.app.post(
             '/api/v1/ducks/donate/',
             params={
-                'species': 1,
-                'color': '123456',
+                'species': self.species.pk,
+                'location': self.location.pk,
+                'color': color,
             },
             user=self.user)
+        self.assertEquals(200, page.status_code)
+        page_json = json.loads(page.content)
+
+        self.assertIn('id', page_json)
+
+        duck = Duck.objects.get(pk=page_json['id'])
+
+        self.assertEquals(color, duck.color)
 
     def test_duck_details(self):
         """

@@ -3,6 +3,8 @@
 Views for the Duck Booking Tool API
 """
 
+import re
+
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
@@ -11,7 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .serializers import DuckSerializer, CompetenceSerializer
-from booking.models import Duck, Competence, Booking
+from booking.models import Duck, Competence, Booking, Species, Location
 
 class DuckViewSet(viewsets.ModelViewSet):
     """
@@ -68,7 +70,34 @@ class DuckViewSet(viewsets.ModelViewSet):
         API call to donate a new duck
         """
 
-        return Response({'Woot!'})
+        color = request.data.get('color')
+        species_id = request.data.get('species')
+        location_id = request.data.get('location')
+
+        if None in (color, species_id, location_id):
+            return Response({'status': 'incomplete-request'}, status=400)
+
+        try:
+            species = Species.objects.get(pk=species_id)
+        except Species.DoesNotExist:
+            return Response({'status': 'bad-species'}, status=404)
+
+        try:
+            location = Location.objects.get(pk=location_id)
+        except Location.DoesNotExist:
+            return Response({'status': 'bad-location'}, status=404)
+
+        if not re.match(r'^[0-9a-f]{6}$', color, flags=re.IGNORECASE):
+            return Response({'status': 'bad-color'}, status=400)
+
+        color = color.lower()
+
+        duck = Duck.objects.create(donated_by=request.user,
+                                   species=species,
+                                   location=location,
+                                   color=color)
+
+        return Response({'status': 'ok', 'id': duck.pk})
 
 class CompetenceViewSet(viewsets.ModelViewSet):
     """
