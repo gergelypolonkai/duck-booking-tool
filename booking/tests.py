@@ -7,13 +7,14 @@ import datetime
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.test import TestCase, Client
+from django.test import TestCase, Client, override_settings
 from django.utils import timezone
 
 from .ducklevel import level_to_up_minutes, level_to_down_minutes, minutes_to_level
 from .templatetags import booking_tags
 from .models import Duck, Competence, DuckCompetence, Species, \
                     Location, Booking, DuckName, DuckNameVote
+from .apps import max_level_check
 
 class FrontTest(TestCase):
     """
@@ -78,15 +79,6 @@ class DuckCompLevelTest(TestCase):
                                                       comp=comp,
                                                       up_minutes=0,
                                                       down_minutes=0)
-
-    def test_sane_max(self):
-        """
-        Test if the MAX_DUCK_LEVEL setting has a sane value
-        """
-
-        self.assertGreater(
-            settings.MAX_DUCK_LEVEL, 0,
-            msg="MAX_DUCK_LEVEL must be greater than zero!")
 
     def test_max_minutes(self):
         """
@@ -491,3 +483,31 @@ class StrTest(TestCase):
 
         self.assertEquals("First Duck booked by test for Testing since {0}".format(start),
                           booking.__str__())
+
+class SystemCheckTest(TestCase):
+    @override_settings()
+    def test_max_duck_level_missing(self):
+        del settings.MAX_DUCK_LEVEL
+
+        errors = max_level_check(None)
+
+        self.assertGreater(
+            len([e for e in errors if e.id == 'booking.E001']),
+            0)
+
+    def test_max_duck_level_illegal(self):
+        with self.settings(MAX_DUCK_LEVEL=0):
+            errors = max_level_check(None)
+
+            self.assertGreater(
+                len([e for e in errors if e.id == 'booking.E002']),
+                0
+            )
+
+        with self.settings(MAX_DUCK_LEVEL=1.1):
+            errors = max_level_check(None)
+
+            self.assertGreater(
+                len([e for e in errors if e.id == 'booking.E003']),
+                0
+            )
