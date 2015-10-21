@@ -6,7 +6,7 @@ Test cases for API calls
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from django_webtest import WebTest
 
 import json
@@ -47,6 +47,22 @@ class TestNamespacedSerializer(TestCase):
 
         with self.assertRaises(ImproperlyConfigured):
             serializer = EmptyNamespacedSerializer()
+
+    def test_namespacing(self):
+        class MySerializer(NamespacedSerializer):
+            class Meta:
+                model = Competence
+                fields = ('url',)
+                url_namespace = 'api'
+
+        competence = Competence.objects.create(
+            added_by=User.objects.create())
+        serializer = MySerializer(competence,
+                                  context={
+                                      'request': RequestFactory().get('/')
+                                  })
+
+        self.assertIsNotNone(serializer.data['url'])
 
 class DuckClassTest(WebTest):
     """
