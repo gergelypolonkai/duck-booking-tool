@@ -1,3 +1,2 @@
-
-def ducks_get() -> str:
+def ducks_get():
     return 'do some magic!'
