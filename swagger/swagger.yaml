@@ -19,6 +19,10 @@ paths:
       responses:
         200:
           description: "An object which contains metadata and an array of ducks"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Duck"
       security:
       - api_key: []
 securityDefinitions:
@@ -26,4 +30,8 @@ securityDefinitions:
     type: "apiKey"
     name: "token"
     in: "header"
-definitions: {}
+definitions:
+  Duck:
+    properties:
+      name:
+        type: "string"
