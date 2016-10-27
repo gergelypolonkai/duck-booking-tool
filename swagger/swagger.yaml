@@ -1,0 +1,21 @@
+swagger: "2.0"
+info:
+  version: "0.0.0"
+  title: "Rubber Duck Booking Tool API"
+basePath: /api/v1
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  api_key:
+    type: apiKey
+    name: token
+    in: header
+paths:
+  /ducks/:
+    get:
+      description: "Get the list of all ducks"
+      responses:
+        "200":
+          description: "An object which contains metadata and an array of ducks"
