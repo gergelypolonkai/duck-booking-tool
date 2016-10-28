@@ -1,7 +1,7 @@
 ---
 swagger: "2.0"
 info:
-  version: "0.0.0"
+  version: "0.1.0"
   title: "Rubber Duck Booking Tool API"
 basePath: "/api/v1"
 consumes:
@@ -25,6 +25,13 @@ paths:
               $ref: '#/definitions/Duck'
       security:
         - api_key: []
+  /duck:
+    get:
+      tags:
+        - "default_controller"
+      responses:
+        200:
+          description: "All data regarding the specified duck"
 securityDefinitions:
   api_key:
     type: "apiKey"
@@ -32,6 +39,28 @@ securityDefinitions:
     in: "header"
 definitions:
   Duck:
+    type: object
     properties:
+      duck_id:
+        type: number
+        description: ID number of the duck
       name:
-        type: "string"
+        type: string
+        description: The name of the duck
+      color:
+        type: string
+        description: Color of the duck
+    #species = models.ForeignKey(Species)
+    #location = models.ForeignKey(Location)
+      #competencies:
+      #  type: array
+      #  items: strings
+      #  description: A list of competencies the duck has
+    #donated_by = models.ForeignKey(User)
+    #donated_at = models.DateTimeField(default=timezone.now)
+    #adopted_by = models.ForeignKey(User, related_name='adopted_ducks', null=True, blank=True)
+    #adopted_at = models.DateTimeField(null=True, blank=True)
+    #bookings = models.ManyToManyField(User, through='Booking', related_name='+')
+    #on_holiday_since = models.DateTimeField(null=True, blank=True)
+    #on_holiday_until = models.DateTimeField(null=True, blank=True)
+
