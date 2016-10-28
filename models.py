@@ -17,5 +17,8 @@ class Duck( Base ):
     color = sa.Column( sa.String )
 
     def __repr__(self):
-        return "<User(name='%s', fullname='%s', password='%s')>" % (
-                             self.name, self.fullname, self.password)
+        return '{"duck_id": "'+ ( str( self.duck_id ) or '0' ) +'", "name": "'+ self.name +'", "color": "'+ self.color +'" }'
+
+    def __init__(self, name, color):
+        self.name = name
+        self.color = color
