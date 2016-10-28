@@ -29,6 +29,7 @@ paths:
     get:
       tags:
         - "default_controller"
+      operationId: "controllers.default_controller.duck_get"
       responses:
         200:
           description: "All data regarding the specified duck"
