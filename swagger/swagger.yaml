@@ -5,14 +5,14 @@ info:
   title: "Rubber Duck Booking Tool API"
 basePath: "/api/v1"
 consumes:
-- "application/json"
+  - "application/json"
 produces:
-- "application/json"
+  - "application/json"
 paths:
-  /ducks/:
+  /ducks:
     get:
       tags:
-      - "default_controller"
+        - "default_controller"
       description: "Get the list of all ducks"
       operationId: "controllers.default_controller.ducks_get"
       parameters: []
@@ -20,11 +20,11 @@ paths:
         200:
           description: "An object which contains metadata and an array of ducks"
           schema:
-            type: "array"
+            type: array
             items:
-              $ref: "#/definitions/Duck"
+              $ref: '#/definitions/Duck'
       security:
-      - api_key: []
+        - api_key: []
 securityDefinitions:
   api_key:
     type: "apiKey"
