@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 
+import os
 import connexion
+import sqlalchemy
+
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+
+engine = create_engine( os.environ.get( 'DATABASE_URL', 'sqlite:///:memory:' ), echo=True )
 
 app = connexion.App(__name__, specification_dir='./swagger/')
 app.add_api('swagger.yaml',
