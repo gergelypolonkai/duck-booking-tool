@@ -20,7 +20,7 @@ paths:
         200:
           description: "An object which contains metadata and an array of ducks"
           schema:
-            type: array
+            type: "array"
             items:
               $ref: '#/definitions/Duck'
       security:
@@ -30,9 +30,33 @@ paths:
       tags:
         - "default_controller"
       operationId: "controllers.default_controller.duck_get"
+      parameters:
+        - name: "duck_id"
+          description: "ID of the Duck"
+          in: "path"
+          required: true
+          type: "integer"
       responses:
         200:
           description: "All data regarding the specified duck"
+    post:
+      tags:
+        - "default_controller"
+      operationId: "controllers.default_controller.duck_post"
+      parameters:
+        - name: "name"
+          description: "Name of the Duck"
+          in: "formData"
+          required: true
+          type: "string"
+        - name: "color"
+          description: "Color of the Duck"
+          in: "formData"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Cool"
 securityDefinitions:
   api_key:
     type: "apiKey"
@@ -40,17 +64,17 @@ securityDefinitions:
     in: "header"
 definitions:
   Duck:
-    type: object
+    type: "object"
     properties:
       duck_id:
-        type: number
-        description: ID number of the duck
+        type: "integer"
+        description: "ID number of the duck"
       name:
-        type: string
-        description: The name of the duck
+        type: "string"
+        description: "The name of the duck"
       color:
-        type: string
-        description: Color of the duck
+        type: "string"
+        description: "Color of the duck"
     #species = models.ForeignKey(Species)
     #location = models.ForeignKey(Location)
       #competencies:
